@@ -17,6 +17,11 @@
 Median::Median(PClip _child, std::vector<PClip> _clips, unsigned int _low, unsigned int _high, bool _temporal, bool _processchroma, unsigned int _sync, unsigned int _samples, bool _debug, IScriptEnvironment* env) :
   GenericVideoFilter(_child), clips(_clips), low(_low), high(_high), temporal(_temporal), processchroma(_processchroma), sync(_sync), samples(_samples), debug(_debug)
 {
+  // Check frame property support
+  has_at_least_v8 = true;
+  try { env->CheckVersion(8); }
+  catch (const AvisynthError&) { has_at_least_v8 = false; }
+
   if (temporal)
     depth = 2 * low + 1; // In this case low == high == radius and we only have one source clip
   else
@@ -123,7 +128,8 @@ PVideoFrame __stdcall Median::GetFrame(int n, IScriptEnvironment* env)
   }
 
   // Output
-  PVideoFrame output = env->NewVideoFrame(vi);
+  // w/ frame property copy source
+  PVideoFrame output = has_at_least_v8 ? env->NewVideoFrameP(vi, temporal ? &src[low] : &src[0]) : env->NewVideoFrame(vi);
 
   // Select between planar and interleaved processing
   if (info[0].IsPlanar())

@@ -21,6 +21,8 @@ public:
   PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
 private:
+  bool has_at_least_v8; // passing frame property support
+
   std::vector<PClip> clips;
   unsigned int low;
   unsigned int high;
