@@ -1,8 +1,8 @@
 CMakeCache.txt
 CMakeFiles/*
 
-RgTools/CMakeCache.txt
-RgTools/CMakeFiles/*
+AjkMedian/CMakeCache.txt
+AjkMedian/CMakeFiles/*
 
 #cmake generated files
 cmake_install.cmake
