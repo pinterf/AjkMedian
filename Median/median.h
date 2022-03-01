@@ -40,6 +40,7 @@ private:
     void ProcessPlanarFrame(PVideoFrame src[MAX_DEPTH], PVideoFrame& dst);
     void ProcessInterleavedFrame(PVideoFrame src[MAX_DEPTH], PVideoFrame& dst);
     inline unsigned char ProcessPixel(unsigned char* values) const;
+    inline std::uint16_t ProcessPixel_16bit(uint16_t *values) const;
 
     void debugf(const char* fmt, ...);
 
