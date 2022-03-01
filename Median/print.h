@@ -12,4 +12,3 @@ void print_rgb(PVideoFrame& dst, unsigned int line, const char* string, bool alp
 void print_planar(PVideoFrame& dst, unsigned int line, const char* string);
 
 #endif // PRINT_H
-
