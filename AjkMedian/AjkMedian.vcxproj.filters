@@ -64,7 +64,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Median.rc">
+    <ResourceCompile Include="AjkMedian.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

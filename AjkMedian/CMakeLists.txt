@@ -16,7 +16,7 @@ project(${ProjectName} LANGUAGES CXX)
 
 Include("Files.cmake")
 
-add_library(${PluginName} SHARED ${Median_Sources})
+add_library(${PluginName} SHARED ${AjkMedian_Sources})
 
 set_target_properties(${PluginName} PROPERTIES "OUTPUT_NAME" "${PluginName}")
 if (MINGW)
@@ -30,7 +30,7 @@ IF(ENABLE_INTEL_SIMD)
 ENDIF()
 
 # Automatically group source files according to directory structure
-foreach(FILE ${Median_Sources}) 
+foreach(FILE ${AjkMedian_Sources}) 
   get_filename_component(PARENT_DIR "${FILE}" PATH)
 
   string(REGEX REPLACE "(\\./)" "" GROUP "${PARENT_DIR}")
