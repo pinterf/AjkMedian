@@ -68,6 +68,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;MEDIAN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -79,11 +80,14 @@
   <ItemGroup>
     <ClCompile Include="filter.cpp" />
     <ClCompile Include="median.cpp" />
+    <ClCompile Include="print.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="avisynth.h" />
+    <ClInclude Include="font.h" />
     <ClInclude Include="median.h" />
     <ClInclude Include="opt_med.h" />
+    <ClInclude Include="print.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

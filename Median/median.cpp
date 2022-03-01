@@ -1,12 +1,13 @@
-#include "stdafx.h"
-#include "median.h"
+#include <cstdarg>
 
+#include "stdafx.h"
+#include "print.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // Constructor
 //////////////////////////////////////////////////////////////////////////////
-Median::Median(PClip _child, vector<PClip> _clips, unsigned int _low, unsigned int _high, bool _temporal, bool _processchroma, IScriptEnvironment *env) :
-  GenericVideoFilter(_child), clips(_clips), low(_low), high(_high), temporal(_temporal), processchroma(_processchroma)
+Median::Median(PClip _child, vector<PClip> _clips, unsigned int _low, unsigned int _high, bool _temporal, bool _processchroma, unsigned int _sync, unsigned int _samples, bool _debug, IScriptEnvironment *env) :
+  GenericVideoFilter(_child), clips(_clips), low(_low), high(_high), temporal(_temporal), processchroma(_processchroma), sync(_sync), samples(_samples), debug(_debug)
 {
     if (temporal)
         depth = 2 * low + 1; // In this case low == high == radius and we only have one source clip
@@ -20,22 +21,15 @@ Median::Median(PClip _child, vector<PClip> _clips, unsigned int _low, unsigned i
     else
         fastprocess = false;
 
-    //env->ThrowError("depth %d blend %d low %d high %d fast %d temporal %d", depth, blend, low, high, (int)fastprocess, (int)temporal);
+    debugf("depth: %d, blend: %d, low: %d, high: %d, fast: %d, temporal: %d, sync: %d, samples: %d", 
+           depth, blend, low, high, (int)fastprocess, (int)temporal, (int)sync, (int)samples);
 
     switch (depth)
     {
-        case 3:
-            fastmedian = opt_med3;
-            break;
-        case 5:
-            fastmedian = opt_med5;
-            break;
-        case 7:
-            fastmedian = opt_med7;
-            break;
-        case 9:
-            fastmedian = opt_med9;
-            break;
+        case 3: fastmedian = opt_med3; break;
+        case 5: fastmedian = opt_med5; break;
+        case 7: fastmedian = opt_med7; break;
+        case 9: fastmedian = opt_med9; break;
     }
 
     if (temporal) 
@@ -75,6 +69,10 @@ Median::~Median()
 //////////////////////////////////////////////////////////////////////////////
 PVideoFrame __stdcall Median::GetFrame(int n, IScriptEnvironment* env)
 {
+    // Sync statistics for this frame
+    double best[MAX_DEPTH] = { 0.0 };
+    int match[MAX_DEPTH] = { 0 };
+
     // Source
     PVideoFrame src[MAX_DEPTH];
 
@@ -85,6 +83,28 @@ PVideoFrame __stdcall Median::GetFrame(int n, IScriptEnvironment* env)
         // TODO: Do I need to worry about negative frames or frames after the last? Looks like no
         for (unsigned int i = 0; i < depth; i++)
             src[i] = clips[0]->GetFrame(n - radius + i, env); // Grab an equal number of preceding and following frames
+    }
+    else if (sync > 0)
+    {
+        src[0] = clips[0]->GetFrame(n, env);
+
+        for (unsigned int i = 1; i < depth; i++)
+        {
+            int radius = sync;
+
+            for (int j = -radius; j <= radius; j++)
+            {
+                double similarity = CompareFrames(PLANAR_Y, src[0], clips[i]->GetFrame(n + j, env), samples);
+
+                if (similarity > best[i])
+                {
+                    best[i] = similarity;
+                    match[i] = j;
+                }
+            }
+
+            src[i] = clips[i]->GetFrame(n + match[i], env);
+        }
     }
     else
     {
@@ -101,7 +121,52 @@ PVideoFrame __stdcall Median::GetFrame(int n, IScriptEnvironment* env)
     else
         ProcessInterleavedFrame(src, output);
 
+    // Print debug information on output image
+    if (debug)
+    {
+        line = 0;
+        textf(output, "FRAME: %d", n);
+        textf(output, "CLIPS: %d", depth);
+
+        if (sync > 0)
+        {
+            textf(output, "SYNC RADIUS: %d", sync);
+            textf(output, "SYNC METRICS:");
+
+            for (unsigned int i = 1; i < depth; i++)
+                textf(output, "%-2d %+-3d %-f", i + 1, match[i], best[i]);
+        }
+    }
+
     return output;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Compare two frames
+// 
+// returns 100.0 -> exact match, 0.0 -> completely different
+//////////////////////////////////////////////////////////////////////////////
+double Median::CompareFrames(int plane, PVideoFrame a, PVideoFrame b, unsigned int points)
+{   
+    const unsigned char* aptr = a->GetReadPtr(plane);
+    const unsigned char* bptr = b->GetReadPtr(plane);
+
+    const unsigned int length = a->GetRowSize(plane) * a->GetHeight(plane);
+
+    if (points < 1 || points > length)
+        points = length;
+
+    const unsigned int step = length / points;
+
+    unsigned long sum = 0;
+
+    for (unsigned int i = 0; i < length; i = i + step)
+        sum = sum + abs((int)aptr[i] - (int)bptr[i]);
+
+    double difference = (100.0 * sum) / (255.0 * points);
+
+    return 100.0 - difference;
 }
 
 
@@ -196,11 +261,7 @@ void Median::ProcessInterleavedFrame(PVideoFrame src[MAX_DEPTH], PVideoFrame& ds
                 }
 
                 dstp[x * 2] = ProcessPixel(luma);
-
-                if (processchroma)
-                    dstp[x * 2 + 1] = ProcessPixel(chroma);
-                else
-                    dstp[x * 2 + 1] = chroma[0]; // Use chroma from first clip
+                dstp[x * 2 + 1] = processchroma ? ProcessPixel(chroma) : chroma[0];
             }
 
             for (unsigned int i = 0; i < depth; i++)
@@ -265,11 +326,7 @@ void Median::ProcessInterleavedFrame(PVideoFrame src[MAX_DEPTH], PVideoFrame& ds
                 dstp[x * 4] = ProcessPixel(b);
                 dstp[x * 4 + 1] = ProcessPixel(g);
                 dstp[x * 4 + 2] = ProcessPixel(r);
-
-                if (processchroma)
-                    dstp[x * 4 + 3] = ProcessPixel(a);
-                else
-                    dstp[x * 4 + 3] = a[0]; // Use alpha from first clip
+                dstp[x * 4 + 3] = processchroma ? ProcessPixel(a) : a[0];
             }
 
             for (unsigned int i = 0; i < depth; i++)
@@ -292,26 +349,63 @@ inline unsigned char Median::ProcessPixel(unsigned char* values) const
     {
         output = fastmedian(values);
     }
-    else // Have to sort the whole thing
+    else // Full processing
     {
-        std::sort(values, values + depth);
+        unsigned int sum = 0;
 
-        if (blend > 1) // Need to average middle values
-        {
-            unsigned int sum = 0;
+        if (blend != depth) // If all clips are to be blended, there is no need to sort them
+          std::sort(values, values + depth);
 
-            for (unsigned int i = low; i < low + blend; i++)
-                sum = sum + values[i];
+        for (unsigned int i = low; i < low + blend; i++)
+            sum = sum + values[i];
 
-            output = sum / blend;
-        }
-        else // Return a single value
-        {
-            output = values[low];
-        }
+        output = sum / blend;
     }
 
     return output;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Print things to be viewed in DebugView
+//////////////////////////////////////////////////////////////////////////////
+void Median::debugf(const char* fmt, ...)
+{
+    if (debug)
+    {
+        char buffer[1024] = { "median: " };
+        char *ptr = buffer + strlen(buffer);
+
+        va_list args;
+        va_start(args, fmt);
+        vsnprintf_s(ptr, sizeof buffer, sizeof buffer, fmt, args);
+        va_end(args);
+
+        OutputDebugStringA(buffer);
+    }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Print things on top of image
+//////////////////////////////////////////////////////////////////////////////
+void Median::textf(PVideoFrame& dst, const char* fmt, ...)
+{
+    char string[1024] = { 0 };
+
+    int n = info[0].width / FONT_WIDTH;
+
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf_s(string, sizeof string, sizeof string, fmt, args);
+    va_end(args);
+    
+    if      (info[0].IsYUY2()  ) print_yuyv  (dst, line, string);
+    else if (info[0].IsRGB24() ) print_rgb   (dst, line, string, false);
+    else if (info[0].IsRGB32() ) print_rgb   (dst, line, string, true);
+    else if (info[0].IsPlanar()) print_planar(dst, line, string);
+
+    line++;
 }
 
 
