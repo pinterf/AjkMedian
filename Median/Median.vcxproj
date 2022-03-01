@@ -165,7 +165,9 @@
     <ClInclude Include="median.h" />
     <ClInclude Include="opt_med.h" />
     <ClInclude Include="print.h" />
-    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Median.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

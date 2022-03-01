@@ -32,9 +32,6 @@
     <ClInclude Include="opt_med.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="font.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -65,5 +62,10 @@
     <ClInclude Include="avisynth.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Median.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
