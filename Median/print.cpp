@@ -3,7 +3,7 @@
 
 static int string_to_bitmap(const char* string, unsigned char* &text_buffer)
 {
-    int text_width = strlen(string) * FONT_WIDTH;
+    unsigned int text_width = (int)strlen(string) * FONT_WIDTH;
 
     text_buffer = (unsigned char*)malloc(text_width * FONT_HEIGHT);
 
