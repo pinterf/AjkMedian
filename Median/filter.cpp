@@ -25,6 +25,7 @@
 // Includes
 #include "stdafx.h"
 
+const AVS_Linkage* AVS_linkage;
 
 //////////////////////////////////////////////////////////////////////////////
 // Create Median filter
@@ -124,8 +125,10 @@ AVSValue __cdecl Create_MedianBlend(AVSValue args, void* user_data, IScriptEnvir
 //////////////////////////////////////////////////////////////////////////////
 // Add filters
 //////////////////////////////////////////////////////////////////////////////
-extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit2(IScriptEnvironment* env)
+extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScriptEnvironment* env, AVS_Linkage* AVS_linkage_arg)
 {
+	AVS_linkage = AVS_linkage_arg;
+
 	env->AddFunction("Median", "c+[CHROMA]b[SYNC]i[SAMPLES]i[DEBUG]b", Create_Median, 0);
     env->AddFunction("TemporalMedian", "c[RADIUS]i[CHROMA]b[DEBUG]b", Create_TemporalMedian, 0);
 	env->AddFunction("MedianBlend", "c+[LOW]i[HIGH]i[CHROMA]b[SYNC]i[SAMPLES]i[DEBUG]b", Create_MedianBlend, 0);
