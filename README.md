@@ -20,7 +20,7 @@ Vapoursynth port https://github.com/dubhater/vapoursynth-median
   - move to VS2019 (v142 toolset)
   - add CMake build environment
   - Linux/GCC friendly source
-  - DLL/so name is AjkMedian
+  - DLL/so name is changed to AjkMedian/libajkpedian (from simple Median - possible name collisions)
 
 20190201 v0.6 (TomArrow)
   - https://forum.doom9.org/showthread.php?p=1864406#post1864406
