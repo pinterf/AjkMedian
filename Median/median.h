@@ -2,7 +2,9 @@
 #define MEDIAN_H
 
 #include <vector>
-using std::vector;
+#include <stdint.h>
+
+#define ERROR_PREFIX "Median: "
 
 const unsigned int MAX_DEPTH = 25;
 const unsigned int MAX_OPT = 9;
@@ -13,13 +15,13 @@ const unsigned int MAX_OPT = 9;
 class Median : public GenericVideoFilter
 {
 public:
-  Median(PClip _child, vector<PClip> _clips, unsigned int _low, unsigned int _high, bool _temporal, bool _processchroma, unsigned int _sync, unsigned int _samples, bool _debug, IScriptEnvironment* env);
+  Median(PClip _child, std::vector<PClip> _clips, unsigned int _low, unsigned int _high, bool _temporal, bool _processchroma, unsigned int _sync, unsigned int _samples, bool _debug, IScriptEnvironment* env);
   ~Median();
 
   PVideoFrame __stdcall GetFrame(int n, IScriptEnvironment* env);
 
 private:
-  vector<PClip> clips;
+  std::vector<PClip> clips;
   unsigned int low;
   unsigned int high;
   bool temporal;
@@ -31,7 +33,7 @@ private:
   unsigned int depth;
   unsigned int blend;
   bool fastprocess;
-  vector<VideoInfo> info;
+  std::vector<VideoInfo> info;
 
   unsigned char (*fastmedian)(unsigned char*);
 
@@ -40,7 +42,7 @@ private:
   void ProcessPlanarFrame(PVideoFrame src[MAX_DEPTH], PVideoFrame& dst);
   void ProcessInterleavedFrame(PVideoFrame src[MAX_DEPTH], PVideoFrame& dst);
   inline unsigned char ProcessPixel(unsigned char* values) const;
-  inline std::uint16_t ProcessPixel_16bit(uint16_t* values) const;
+  inline uint16_t ProcessPixel_16bit(uint16_t* values) const;
 
   void debugf(const char* fmt, ...);
 

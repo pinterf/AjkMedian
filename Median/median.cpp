@@ -1,13 +1,20 @@
-#include <cstdarg>
 
-#include "stdafx.h"
+#include "avisynth.h"
 #include "print.h"
+#include "median.h"
+#include "opt_med.h"
+#include <vector>
+#include <stdint.h>
+#include <stdio.h>
 
-
+#ifdef _WIN32
+#include <Windows.h>
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 //////////////////////////////////////////////////////////////////////////////
 // Constructor
 //////////////////////////////////////////////////////////////////////////////
-Median::Median(PClip _child, vector<PClip> _clips, unsigned int _low, unsigned int _high, bool _temporal, bool _processchroma, unsigned int _sync, unsigned int _samples, bool _debug, IScriptEnvironment* env) :
+Median::Median(PClip _child, std::vector<PClip> _clips, unsigned int _low, unsigned int _high, bool _temporal, bool _processchroma, unsigned int _sync, unsigned int _samples, bool _debug, IScriptEnvironment* env) :
   GenericVideoFilter(_child), clips(_clips), low(_low), high(_high), temporal(_temporal), processchroma(_processchroma), sync(_sync), samples(_samples), debug(_debug)
 {
   if (temporal)
@@ -22,8 +29,10 @@ Median::Median(PClip _child, vector<PClip> _clips, unsigned int _low, unsigned i
   else
     fastprocess = false;
 
+#ifdef _WIN32
   debugf("depth: %d, blend: %d, low: %d, high: %d, fast: %d, temporal: %d, sync: %d, samples: %d",
     depth, blend, low, high, (int)fastprocess, (int)temporal, (int)sync, (int)samples);
+#endif
 
   switch (depth)
   {
@@ -341,10 +350,10 @@ void Median::ProcessInterleavedFrame(PVideoFrame src[MAX_DEPTH], PVideoFrame& ds
     //////////////////////////////////////////////////////////////////////
     // BGRA
     //////////////////////////////////////////////////////////////////////
-    std::uint16_t b_16bit[MAX_DEPTH];
-    std::uint16_t g_16bit[MAX_DEPTH];
-    std::uint16_t r_16bit[MAX_DEPTH];
-    std::uint16_t a_16bit[MAX_DEPTH];
+    uint16_t b_16bit[MAX_DEPTH];
+    uint16_t g_16bit[MAX_DEPTH];
+    uint16_t r_16bit[MAX_DEPTH];
+    uint16_t a_16bit[MAX_DEPTH];
 
     for (int y = 0; y < height; ++y)
     {
@@ -427,6 +436,7 @@ inline unsigned char Median::ProcessPixel(unsigned char* values) const
 }
 
 
+#ifdef _WIN32
 //////////////////////////////////////////////////////////////////////////////
 // Print things to be viewed in DebugView
 //////////////////////////////////////////////////////////////////////////////
@@ -439,13 +449,13 @@ void Median::debugf(const char* fmt, ...)
 
     va_list args;
     va_start(args, fmt);
-    vsnprintf_s(ptr, sizeof buffer, sizeof buffer, fmt, args);
+    vsnprintf(ptr, sizeof(buffer), fmt, args);
     va_end(args);
 
     OutputDebugStringA(buffer);
   }
 }
-
+#endif
 
 //////////////////////////////////////////////////////////////////////////////
 // Print things on top of image
@@ -458,7 +468,7 @@ void Median::textf(PVideoFrame& dst, const char* fmt, ...)
 
   va_list args;
   va_start(args, fmt);
-  vsnprintf_s(string, sizeof string, sizeof string, fmt, args);
+  vsnprintf(string, sizeof(string), fmt, args);
   va_end(args);
 
   if (info[0].IsYUY2()) print_yuyv(dst, line, string);

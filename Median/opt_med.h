@@ -10,6 +10,8 @@
 #ifndef _OPT_MED_H
 #define _OPT_MED_H
 
+#include <algorithm>
+
 typedef unsigned char pixelvalue;
 #define PIX_SORT(a,b) { if ((a)>(b)) PIX_SWAP((a),(b)); }
 #define PIX_SWAP(a,b) { pixelvalue temp=(a);(a)=(b);(b)=temp; }
@@ -28,7 +30,7 @@ static inline pixelvalue opt_med3(pixelvalue* p)
   //PIX_SORT(p[0], p[1]); PIX_SORT(p[1], p[2]); PIX_SORT(p[0], p[1]);
 
   //return(p[1]);
-  return max(min(p[0], p[1]), min(max(p[0], p[1]), p[2])); // Maybe faster?
+  return std::max(std::min(p[0], p[1]), std::min(std::max(p[0], p[1]), p[2])); // Maybe faster?
 }
 
 

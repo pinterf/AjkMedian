@@ -9,23 +9,13 @@
 //
 // License: Public domain. Credit would be nice, but do with this what you will.
 //
-// Forum thread: http://forum.doom9.org/showthread.php?t=170216
-//               http://forum.videohelp.com/threads/362361-Median%28%29-plugin-for-AviSynth
-//
-// History:
-// 12-Feb-2014,  0.1: Initial release. YUY2 support only
-// 13-Feb-2014,  0.2: Added support for RGB and planar formats
-// 13-Feb-2014,  0.3: Fixed output frame buffer issue
-// 14-Feb-2014,  0.4: Added MedianBlend functionality
-// 15-Mar-2014,  0.5: Added TemporalMedian functionality
-// xx-Nov-2015,  0.6: Added sync functionality
-//
 //////////////////////////////////////////////////////////////////////////////
 
 // Includes
-#include "stdafx.h"
-
-const AVS_Linkage* AVS_linkage;
+#include "avisynth.h"
+#include <vector>
+#include <stdint.h>
+#include "median.h"
 
 //////////////////////////////////////////////////////////////////////////////
 // Create Median filter
@@ -38,7 +28,7 @@ AVSValue __cdecl Create_Median(AVSValue args, void* user_data, IScriptEnvironmen
   if (n < 3 || n > 25 || n % 2 == 0)
     env->ThrowError(ERROR_PREFIX "Need an odd number of clips between 3 and 25.");
 
-  vector<PClip> clips;
+  std::vector<PClip> clips;
 
   for (int i = 0; i < n; i++)
     clips.push_back(array[i].AsClip());
@@ -68,7 +58,7 @@ AVSValue __cdecl Create_Median(AVSValue args, void* user_data, IScriptEnvironmen
 //////////////////////////////////////////////////////////////////////////////
 AVSValue __cdecl Create_TemporalMedian(AVSValue args, void* user_data, IScriptEnvironment* env)
 {
-  vector<PClip> clips;
+  std::vector<PClip> clips;
   clips.push_back(args[0].AsClip());
 
   // Parameters
@@ -95,7 +85,7 @@ AVSValue __cdecl Create_MedianBlend(AVSValue args, void* user_data, IScriptEnvir
   if (n < 3 || n > 25)
     env->ThrowError(ERROR_PREFIX "Need 3-25 clips.");
 
-  vector<PClip> clips;
+  std::vector<PClip> clips;
 
   for (int i = 0; i < n; i++)
     clips.push_back(array[i].AsClip());
@@ -125,6 +115,8 @@ AVSValue __cdecl Create_MedianBlend(AVSValue args, void* user_data, IScriptEnvir
 //////////////////////////////////////////////////////////////////////////////
 // Add filters
 //////////////////////////////////////////////////////////////////////////////
+const AVS_Linkage* AVS_linkage;
+
 extern "C" __declspec(dllexport) const char* __stdcall AvisynthPluginInit3(IScriptEnvironment * env, AVS_Linkage * AVS_linkage_arg)
 {
   AVS_linkage = AVS_linkage_arg;

@@ -1,5 +1,8 @@
 #include "print.h"
 #include "font.h"
+#include <cstring>
+#include <stdlib.h>
+#include <algorithm>
 
 static int string_to_bitmap(const char* string, unsigned char*& text_buffer)
 {
@@ -46,7 +49,7 @@ void print_yuyv(PVideoFrame& dst, unsigned int line, const char* string)
     {
       unsigned char* pixel = row;
 
-      for (int x = 0; x < min(text_width, image_width); x++)
+      for (int x = 0; x < std::min(text_width, image_width); x++)
       {
         *pixel++ = text[x]; // Y
         *pixel++ = 128;     // U/V = neutral
@@ -89,7 +92,7 @@ void print_rgb(PVideoFrame& dst, unsigned int line, const char* string, bool alp
 
       unsigned char* pixel = row;
 
-      for (int x = 0; x < min(text_width, image_width); x++)
+      for (int x = 0; x < std::min(text_width, image_width); x++)
       {
         *pixel++ = text[x]; // R
         *pixel++ = text[x]; // G
@@ -131,7 +134,7 @@ void print_planar(PVideoFrame& dst, unsigned int line, const char* string)
     {
       unsigned char* pixel = row;
 
-      for (int x = 0; x < min(text_width, image_width); x++)
+      for (int x = 0; x < std::min(text_width, image_width); x++)
         *pixel++ = text[x]; // Y
 
       row = row + dst->GetPitch();
