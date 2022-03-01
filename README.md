@@ -4,9 +4,13 @@ An Avisynth Median Filter by ajk
 ## Links
 
 Forum thread: http://forum.doom9.org/showthread.php?t=170216
+
 Forum thread: http://forum.videohelp.com/threads/362361-Median%28%29-plugin-for-AviSynth
+
 https://forum.doom9.org/showthread.php?p=1864302#post1864302
+
 https://forum.doom9.org/showpost.php?p=1864406&postcount=55
+
 Vapoursynth port https://github.com/dubhater/vapoursynth-median
 
 ## Change log
@@ -81,7 +85,7 @@ From the 'build' folder under project root:
 
 * Find binaries at
 
-        build/ArjMedian/AjkMedian.so
+        build/AjkMedian/AjkMedian.so
 
 * Install binaries
 
