@@ -480,6 +480,7 @@ void Median::textf(PVideoFrame& dst, const char* fmt, ...)
   if (info[0].IsYUY2()) print_yuyv(dst, line, string);
   else if (info[0].IsRGB24()) print_rgb(dst, line, string, false);
   else if (info[0].IsRGB32()) print_rgb(dst, line, string, true);
+  else if (info[0].pixel_type == VideoInfo::CS_BGR64) print_rgb64 (dst, line, string);
   else if (info[0].IsPlanar()) print_planar(dst, line, string);
 
   line++;

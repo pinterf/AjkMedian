@@ -112,6 +112,52 @@ done:
   free(text_buffer);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+// RGB64
+//////////////////////////////////////////////////////////////////////////////
+void print_rgb64(PVideoFrame& dst, unsigned int line, const char* string)
+{
+    unsigned char* text_buffer;
+
+    int text_width = string_to_bitmap(string, text_buffer);
+    int image_width = dst->GetPitch() / 8;
+
+    unsigned char* end = dst->GetWritePtr();
+    unsigned char* row = dst->GetWritePtr() + ((dst->GetHeight() - FONT_SCALE * FONT_HEIGHT * line - 1) * dst->GetPitch());
+
+    for (int y = 0; y < FONT_HEIGHT; y++)
+    {
+        unsigned char* text = text_buffer + y * text_width;
+
+        for (int n = 0; n < FONT_SCALE; n++)
+        {
+            if (row < end)
+                goto done;
+
+            unsigned char* pixel = row;
+
+            for (int x = 0; x < std::min(text_width, image_width); x++)
+            {
+                *pixel++;
+                *pixel++ = text[x]; // R
+                *pixel++;
+                *pixel++ = text[x]; // G
+                *pixel++;
+                *pixel++ = text[x]; // B
+                *pixel++;
+                *pixel++ = 255; // A
+            }
+
+            row = row - dst->GetPitch();
+
+        }
+    }
+
+done:
+
+    free(text_buffer);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Planar colourspaces
